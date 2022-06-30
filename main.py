@@ -34,13 +34,14 @@ def register():
     if request.method == 'POST':
         new_user = request.form
 
-        name = new_user['name']
-        email = new_user['email']
-        password = new_user['password']
+        name_entered = new_user['name']
+        email_entered = new_user['email']
+        password_entered = new_user['password']
+        pw_hash = generate_password_hash(password=password_entered, method='pbkdf2:sha256', salt_length=8)
 
-        user = User(name=name,
-                    email=email,
-                    password=password)
+        user = User(name=name_entered,
+                    email=email_entered,
+                    password=pw_hash)
         db.session.add(user)
         db.session.commit()
 
