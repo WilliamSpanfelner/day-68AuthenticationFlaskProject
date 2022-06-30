@@ -10,13 +10,16 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-##CREATE TABLE IN DB
+
+# #CREATE TABLE IN DB
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(100), unique=True)
     password = db.Column(db.String(100))
     name = db.Column(db.String(1000))
-#Line below only required once, when creating DB. 
+
+
+# Line below only required once, when creating DB.
 # db.create_all()
 
 
@@ -25,8 +28,23 @@ def home():
     return render_template("index.html")
 
 
-@app.route('/register')
+@app.route('/register', methods=['GET', 'POST'])
 def register():
+    if request.method == 'POST':
+        new_user = request.form
+
+        name = new_user['name']
+        email = new_user['email']
+        password = new_user['password']
+
+        user = User(name=name,
+                    email=email,
+                    password=password)
+        db.session.add(user)
+        db.session.commit()
+
+        return redirect(url_for('secrets', name=user.name))
+
     return render_template("register.html")
 
 
@@ -37,7 +55,8 @@ def login():
 
 @app.route('/secrets')
 def secrets():
-    return render_template("secrets.html")
+    name = request.args.get('name')
+    return render_template("secrets.html", name=name)
 
 
 @app.route('/logout')
