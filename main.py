@@ -60,8 +60,24 @@ def register():
     return render_template("register.html")
 
 
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
+    if request.method == 'POST':
+        # Authenticate user and redirect to secrets page
+        user = request.form
+        email_entered = user['email']
+        password_entered = user['password']
+
+        # Does the user exist?
+        existing_user = User.query.filter_by(email=email_entered).first()
+
+        if existing_user and check_password_hash(existing_user.password, password_entered):
+            return redirect(url_for('secrets', name=existing_user.name))
+
+        # otherwise redirect to login and present message.
+        flash('Please verify login credentials and try again.')
+        return redirect(url_for('login'))
+
     return render_template("login.html")
 
 
