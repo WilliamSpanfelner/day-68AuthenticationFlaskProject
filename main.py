@@ -67,7 +67,7 @@ def register():
 
         # Create session cookie here?
         # login_user(new_user)
-        return redirect(url_for('secrets', name=new_user.name))
+        return redirect(url_for('secrets'))
 
     return render_template("register.html")
 
@@ -85,7 +85,7 @@ def login():
 
         if existing_user and check_password_hash(existing_user.password, password_entered):
             login_user(existing_user)
-            return redirect(url_for('secrets', name=existing_user.name))
+            return redirect(url_for('secrets'))
 
         # otherwise redirect to login and present message.
         flash('Please verify login credentials and try again.')
@@ -95,9 +95,10 @@ def login():
 
 
 @app.route('/secrets')
+@login_required
 def secrets():
-    name = request.args.get('name')
-    return render_template("secrets.html", name=name)
+    # name = request.args.get('name')
+    return render_template("secrets.html", name=current_user.name)
 
 
 @app.route('/logout')
@@ -106,6 +107,7 @@ def logout():
 
 
 @app.route('/download')
+@login_required
 def download():
     return send_from_directory(directory='', path='static/files/cheat_sheet.pdf')
 
