@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, url_for, redirect, flash, sen
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
-import os
 
 app = Flask(__name__)
 
@@ -32,20 +31,31 @@ def home():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        new_user = request.form
+        user = request.form
 
-        name_entered = new_user['name']
-        email_entered = new_user['email']
-        password_entered = new_user['password']
-        pw_hash = generate_password_hash(password=password_entered, method='pbkdf2:sha256', salt_length=8)
+        name_entered = user['name']
+        email_entered = user['email']
+        password_entered = user['password']
 
-        user = User(name=name_entered,
+        pw_hash = generate_password_hash(password=password_entered,
+                                         method='pbkdf2:sha256',
+                                         salt_length=8)
+
+        # Check whether a duplicate user exists and send message accordingly
+        user_is_duplicate = User.query.filter_by(email=email_entered).first()
+
+        if user_is_duplicate:
+            flash('Email address already exists.')
+            return redirect(url_for('register'))
+
+        new_user = User(name=name_entered,
                     email=email_entered,
                     password=pw_hash)
-        db.session.add(user)
+
+        db.session.add(new_user)
         db.session.commit()
 
-        return redirect(url_for('secrets', name=user.name))
+        return redirect(url_for('secrets'))
 
     return render_template("register.html")
 
