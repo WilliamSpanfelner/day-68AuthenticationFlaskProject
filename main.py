@@ -22,6 +22,16 @@ class User(UserMixin, db.Model):
 # Line below only required once, when creating DB.
 # db.create_all()
 
+# Setup the user loader that sets up session cookie
+login_manager = LoginManager()
+login_manager.login_view = 'login'
+login_manager.init_app(app)
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
 
 @app.route('/')
 def home():
@@ -49,12 +59,14 @@ def register():
             return redirect(url_for('register'))
 
         new_user = User(name=name_entered,
-                    email=email_entered,
-                    password=pw_hash)
+                        email=email_entered,
+                        password=pw_hash)
 
         db.session.add(new_user)
         db.session.commit()
 
+        # Create session cookie here?
+        # login_user(new_user)
         return redirect(url_for('secrets', name=new_user.name))
 
     return render_template("register.html")
@@ -72,6 +84,7 @@ def login():
         existing_user = User.query.filter_by(email=email_entered).first()
 
         if existing_user and check_password_hash(existing_user.password, password_entered):
+            login_user(existing_user)
             return redirect(url_for('secrets', name=existing_user.name))
 
         # otherwise redirect to login and present message.
