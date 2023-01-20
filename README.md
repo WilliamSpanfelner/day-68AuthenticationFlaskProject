@@ -1,3 +1,4 @@
+![Screenshot](day-68AuthenticationFlaskProject.png)
 # Authentication with Flask project.
 - 👋 Hi, I’m @WilliamSpanfelner
 - 👀 I’m interested in using Python with Swift in iOS environments and why it may or may not be desirable.
